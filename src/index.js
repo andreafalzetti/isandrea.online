@@ -3,14 +3,11 @@
 /**
  * Set the necessary nw.js stuff
  */
-
 var gui = window.require('nw.gui');
 var os = require('os');
 var fs = require('fs');
 var util = require('util');
-
 var __dirname = process.cwd();
-
 var windows = gui.Window.get();
 var menu = new gui.Menu();
 
@@ -18,8 +15,18 @@ var menu = new gui.Menu();
  * Handle errors/logging
  */
 process.on('uncaughtException', function(err) {
+
+    err = err.toString();
     console.log(err);
-    alert('Fatal Error! Check debug log for details.');
+
+    if (~err.indexOf("XMLHttpRequest")) {
+        clearInterval(timeout);
+        timeout = 0;
+        enabled.checked = false;
+        alert("Error pinging " + url.value + ". Please check the URL/your internet connection and try again.");
+    } else {
+        alert('A fatal error occured! Check the debug.log.');
+    }
 });
 
 var log_file = fs.createWriteStream(__dirname + '/debug.log', {
@@ -29,8 +36,8 @@ var log_file = fs.createWriteStream(__dirname + '/debug.log', {
 var log_stdout = process.stdout;
 
 console.log = function(d) {
-    log_file.write(util.format(d) + '\n');
-    log_stdout.write(util.format(d) + '\n');
+    log_file.write(getDateTime() + " - " + util.format(d) + '\n');
+    log_stdout.write(getDateTime() + " - " + util.format(d) + '\n');
 };
 
 /**
@@ -88,10 +95,21 @@ function init() {
     var interval = document.getElementById("interval");
     var enabled = document.getElementById("enabled");
     var close = document.getElementById("close");
+    var author = document.getElementById("author__url");
+    var debug = document.getElementById("debug__link");
 
     close.onclick = function() {
         windows.hide();
     };
+
+    author.onclick = function() {
+        gui.Shell.openExternal('https://kingsleyraspe.co.uk');
+    };
+
+    debug.onclick = function() {
+        alert("Attempting to open log. If it doesn't open, navigate to " + __dirname + "/debug.log");
+        gui.Shell.openItem('./debug.log');
+    }
 
     getSettings();
 
@@ -114,9 +132,6 @@ function ping() {
 
         return true;
     }
-
-    clearInterval(timeout);
-    timeout = 0;
 }
 
 /**
@@ -156,6 +171,9 @@ function saveSettings() {
 
     var error = false;
 
+    clearInterval(timeout);
+    timeout = 0;
+
     if (enabled.checked) {
 
         // Validate URL
@@ -191,12 +209,19 @@ function saveSettings() {
  * @return void
  */
 function updateHeartbeat() {
+    document.getElementById("heartbeat__value").innerHTML = getDateTime();
+};
+
+/**
+ * Get date time
+ * @return string
+ */
+function getDateTime() {
     var now = new Date();
-    var strDateTime = [
+    return [
         [AddZero(now.getDate()), AddZero(now.getMonth() + 1), now.getFullYear()].join("/"), [AddZero(now.getHours()), AddZero(now.getMinutes())].join(":"), now.getHours() >= 12 ? "PM" : "AM"
     ].join(" ");
-    document.getElementById("heartbeat__value").innerHTML = strDateTime;
-};
+}
 
 /**
  * Add a 0 for single-digit date/time values
