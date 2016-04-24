@@ -136,6 +136,7 @@
         </style>
 
         <?php include_once("analyticstracking.php") ?>
+        <?php include_once("chat.php") ?>
     </head>
     <body id="app" class="Andrea--is-<?php echo $status;?>">
         <main role="main" class="status">

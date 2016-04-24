@@ -6,3 +6,4 @@
   $config->updated_file = '../private/last_updated.txt';
   $config->timespan = '-2 minutes';
   $config->timezone = "Europe/London";
+  $config->clickDesk = "";
