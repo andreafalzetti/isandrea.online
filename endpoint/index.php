@@ -4,17 +4,31 @@
     date_default_timezone_set($config->timezone);
     
     // Update timestamp
-    if(isset($_GET['password'])){
+    if(isset($_GET['password'])){        
         $success = false;
         $password = file_get_contents($config->password_file);
-        $password = trim($password);
+        $password = trim($password);        
         if($_GET['password'] == $password){
-            file_put_contents($config->updated_file, date('Y-m-d H:i:s'));
+            $interval = isset($_GET['interval']) ? $_GET['interval'] : 5;
+            $timeout = 10;
+            $timeout = ($interval >= $timeout) ? $interval + 1 : $timeout;
+            if(isset($_GET['offline']) && $_GET['offline'] == "1"){
+                $dateToWrite = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s").$config->timespan));
+                $expires_on = false;
+            }else{
+                $dateToWrite = date('Y-m-d H:i:s');
+                $expires_on = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")." +{$timeout} minutes"));
+            }
+            file_put_contents($config->updated_file, $dateToWrite);
             $success = true;
-        }
+        }        
+        http_response_code(($success) ? 200 : 400);
         header('Content-type: application/json');
-        echo json_encode(array('success' => $success));
-        exit();
+        echo json_encode(array(
+            'success' => $success,
+            'expires_on' => $expires_on
+        ));
+        exit();      
     }
 
     // Fetch timestamp

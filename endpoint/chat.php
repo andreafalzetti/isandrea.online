@@ -1,6 +1,6 @@
 <!-- ClickDesk Live Chat Service for websites -->
 <script type='text/javascript'>
-var _glc =_glc || []; _glc.push(<?php echo $config->clickDesk; ?>);
+var _glc =_glc || []; _glc.push("<?php echo $config->clickDesk; ?>");
 var glcpath = (('https:' == document.location.protocol) ? 'https://my.clickdesk.com/clickdesk-ui/browser/' : 
 'http://my.clickdesk.com/clickdesk-ui/browser/');
 var glcp = (('https:' == document.location.protocol) ? 'https://' : 'http://');
